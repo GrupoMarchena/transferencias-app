@@ -6,12 +6,15 @@ import requests
 from io import BytesIO
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import json
 
+URL_PLANTILLA = st.secrets["URL_PLANTILLA"]
 @st.cache_data
 def cargar_datos():
     # Conexión con Google Sheets vía API
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credenciales.json", scope)
+    creds_dict = st.secrets["google_service_account"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(json.loads(json.dumps(creds_dict)), scope)
     client = gspread.authorize(creds)
 
     sheet = client.open_by_key("1srAGigOz4fI9tfYTAP1-ens9M27-1TapSQaLZIgEhDE")
