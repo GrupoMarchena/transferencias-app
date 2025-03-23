@@ -4,19 +4,24 @@ import openpyxl
 import tempfile
 import requests
 from io import BytesIO
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-# === CONFIGURACIÓN ===
-URL_SHEET = "https://docs.google.com/spreadsheets/d/1srAGigOz4fI9tfYTAP1-ens9M27-1TapSQaLZIgEhDE/export?format=csv&gid="
-URL_PLANTILLA = "https://docs.google.com/spreadsheets/d/1cR_n8hRaJjfjmUSROxDuOYMI4rSn2wRc/export?format=xlsx"
-
-# === CARGAR DATOS ===
 @st.cache_data
 def cargar_datos():
-    clientes = pd.read_csv(URL_SHEET + "0")  # Hoja 'clientes'
-    ctas = pd.read_csv(URL_SHEET + "1814563262")  # Hoja 'ctas'
-    return clientes, ctas
+    # Conexión con Google Sheets vía API
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_name("credenciales.json", scope)
+    client = gspread.authorize(creds)
 
-clientes, ctas = cargar_datos()
+    sheet = client.open_by_key("1srAGigOz4fI9tfYTAP1-ens9M27-1TapSQaLZIgEhDE")
+    clientes_ws = sheet.worksheet("clientes")
+    ctas_ws = sheet.worksheet("ctas")
+
+    clientes = pd.DataFrame(clientes_ws.get_all_records())
+    ctas = pd.DataFrame(ctas_ws.get_all_records())
+
+    return clientes, ctas
 
 # === FILTRAR TITULARES Y PROVEEDORES ===
 titulares = clientes[clientes["tipo"] == 1]
