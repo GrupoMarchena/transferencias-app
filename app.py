@@ -8,7 +8,6 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 
-URL_PLANTILLA = st.secrets["URL_PLANTILLA"]
 @st.cache_data
 def cargar_datos():
     # Conexión con Google Sheets vía API
@@ -54,7 +53,8 @@ with st.form("formulario_transferencia"):
 # === PROCESAR Y GENERAR ARCHIVO ===
 if submitted:
     # Descargar plantilla
-    response = requests.get(URL_PLANTILLA)
+    URL_PLANTILLA = st.secrets["URL_PLANTILLA"]
+    response = requests.get(URL_PLANTILLA)    
     wb = openpyxl.load_workbook(BytesIO(response.content))
     ws = wb.active
 
